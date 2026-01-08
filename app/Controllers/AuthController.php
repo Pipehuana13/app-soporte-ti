@@ -18,7 +18,7 @@ class AuthController
     {
         // Si ya está logueado, lo mandamos al dashboard
         if (isset($_SESSION['user'])) {
-            header('Location: /dashboard');
+            header('Location: dashboard');
             exit;
         }
 
@@ -36,7 +36,7 @@ class AuthController
         // Validación básica
         if ($email === '' || $password === '') {
             $_SESSION['flash_error'] = 'Ingresa correo y contraseña.';
-            header('Location: /login');
+            header('Location: login');
             exit;
         }
 
@@ -45,7 +45,7 @@ class AuthController
         // Credenciales
         if (!$user || !isset($user['password_hash']) || !password_verify($password, $user['password_hash'])) {
             $_SESSION['flash_error'] = 'Credenciales incorrectas.';
-            header('Location: /login');
+            header('Location: login');
             exit;
         }
 
@@ -59,7 +59,7 @@ class AuthController
             'role'  => (string)$user['role'],
         ];
 
-        header('Location: /dashboard');
+        header('Location: dashboard');
         exit;
     }
 
@@ -75,7 +75,7 @@ class AuthController
 
         session_destroy();
 
-        header('Location: /login');
+        header('Location: login');
         exit;
     }
 }

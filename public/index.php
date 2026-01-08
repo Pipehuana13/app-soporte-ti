@@ -10,10 +10,15 @@ session_start();
 
 $router = new Router();
 
-$router->get('/', function () {
-    header('Location: /login');
-    exit;
+$router->get('/dashboard', function () {
+    if (!isset($_SESSION['user'])) {
+        header('Location: /login');
+        exit;
+    }
+
+    require __DIR__ . '/../views/dashboard.php';
 });
+
 
 $router->get('/login', [new AuthController(), 'showLogin']);
 $router->post('/login', [new AuthController(), 'doLogin']);

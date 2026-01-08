@@ -12,7 +12,7 @@ class UserRepository
     public function __construct()
     {
         $this->pdo = new PDO(
-            "mysql:host=localhost;dbname=soportefelipe;charset=utf8mb4",
+            "mysql:host=localhost;dbname=soporte_ti;charset=utf8mb4",
             "root",
             "",
             [
