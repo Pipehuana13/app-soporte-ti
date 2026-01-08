@@ -11,7 +11,7 @@
     <p style="color:red;"><?= htmlspecialchars($error) ?></p>
   <?php endif; ?>
 
-  <form method="post" action="">
+  <form method="post" action="/login">
     <div>
       <label>Email</label>
       <input type="email" name="email" required>
