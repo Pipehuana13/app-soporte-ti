@@ -1,0 +1,15 @@
+{
+  "name": "felipearaya/soporte-ti",
+  "description": "Sistema de soporte TI - gestor de tickets (server-render)",
+  "type": "project",
+  "license": "propietary",
+  "require": {
+    "php": "^8.2",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    }
+  }
+}
