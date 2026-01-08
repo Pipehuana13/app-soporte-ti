@@ -25,7 +25,7 @@ class AuthController
         $error = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_error']);
 
-        require __DIR__ . '/../../views/login.php';
+        require __DIR__ . '/../../views/auth/login.php';
     }
 
     public function doLogin(): void
