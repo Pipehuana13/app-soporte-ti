@@ -23,7 +23,7 @@ final class UserRepository
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$user) return null;
 
-        if ((int)$user['is_active'] !== 1) {
+        if ((int)$user['active'] !== 1) {
             return null;
         }
 
