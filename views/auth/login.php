@@ -11,7 +11,8 @@
     <p style="color:red;"><?= htmlspecialchars($error) ?></p>
   <?php endif; ?>
 
-  <form method="post" action="/login">
+  <!-- IMPORTANTE: acción relativa (sin /) para subcarpeta -->
+  <form method="post" action="login">
     <div>
       <label>Email</label>
       <input type="email" name="email" required>
@@ -19,7 +20,8 @@
 
     <div>
       <label>Contraseña</label>
-      <input type="password" name="pass" required>
+      <!-- IMPORTANTE: name debe ser "password" -->
+      <input type="password" name="password" required>
     </div>
 
     <button type="submit">Entrar</button>

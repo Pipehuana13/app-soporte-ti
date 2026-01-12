@@ -12,13 +12,12 @@ $router = new Router();
 
 $router->get('/dashboard', function () {
     if (!isset($_SESSION['user'])) {
-        header('Location: /login');
+        header('Location: login');
         exit;
     }
 
     require __DIR__ . '/../views/dashboard.php';
 });
-
 
 $router->get('/login', [new AuthController(), 'showLogin']);
 $router->post('/login', [new AuthController(), 'doLogin']);
