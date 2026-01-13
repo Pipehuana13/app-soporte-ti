@@ -36,6 +36,10 @@ $user = $_SESSION['user'] ?? null;
           <li class="nav-item">
             <a class="nav-link" href="<?= BASE_URL ?>/tickets/create">Crear ticket</a>
           </li>
+
+      <?php if (($user['role'] ?? '') === 'admin'): ?>
+          <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>/admin/users">Usuarios</a></li>
+        <?php endif; ?>
         </ul>
       <?php endif; ?>
 
@@ -48,10 +52,6 @@ $user = $_SESSION['user'] ?? null;
         <?php else: ?>
           <a class="btn btn-outline-light btn-sm" href="<?= BASE_URL ?>/login">Login</a>
         <?php endif; ?>
-
-        <?php if (($user['role'] ?? '') === 'admin'): ?>
-  <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>/admin/users">Usuarios</a></li>
-<?php endif; ?>
 
       </div>
     </div>

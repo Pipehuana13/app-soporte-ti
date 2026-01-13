@@ -1,56 +1,55 @@
 <?php
-$title = 'Ticket #' . $ticket['id'];
+$title = 'Ticket #' . (int)$ticket['id'];
 require __DIR__ . '/../layouts/header.php';
 
-$isAdmin = ($_SESSION['user']['role'] ?? '') === 'admin';
+$isAdmin = (($_SESSION['user']['role'] ?? '') === 'admin');
+
+function statusBadge(string $status): string {
+    return match ($status) {
+        'abierto'     => '<span class="badge text-bg-success">Abierto</span>',
+        'en_proceso'  => '<span class="badge text-bg-warning">En proceso</span>',
+        'cerrado'     => '<span class="badge text-bg-secondary">Cerrado</span>',
+        default       => '<span class="badge text-bg-light">N/D</span>',
+    };
+}
 ?>
 
 <div class="card shadow-sm">
   <div class="card-body">
-    <h1 class="h5 mb-3"><?= htmlspecialchars($ticket['title']) ?></h1>
+    <div class="d-flex justify-content-between align-items-start gap-3">
+      <div>
+        <h1 class="h5 mb-2"><?= htmlspecialchars($ticket['title']) ?></h1>
+        <div class="mb-3"><?= statusBadge((string)$ticket['status']) ?></div>
+      </div>
 
-    <p><?= nl2br(htmlspecialchars($ticket['description'])) ?></p>
+      <a class="btn btn-outline-secondary btn-sm" href="<?= BASE_URL ?>/tickets">Volver</a>
+    </div>
 
-    <p class="text-muted">
-      Creado por <?= htmlspecialchars($ticket['user_name']) ?> · <?= $ticket['created_at'] ?>
+    <p class="mb-3"><?= nl2br(htmlspecialchars($ticket['description'])) ?></p>
+
+    <p class="text-muted small mb-4">
+      Creado por <strong><?= htmlspecialchars($ticket['user_name']) ?></strong>
+      · <?= htmlspecialchars((string)$ticket['created_at']) ?>
     </p>
 
-    <hr>
-
-    <p><strong>Estado:</strong> <?= $ticket['status'] ?></p>
-    <p><strong>Prioridad:</strong> <?= $ticket['priority'] ?></p>
-
     <?php if ($isAdmin): ?>
-      <form method="post" action="<?= BASE_URL ?>/tickets/update" class="row g-2 mt-3">
-        <input type="hidden" name="id" value="<?= $ticket['id'] ?>">
+      <form method="post" action="<?= BASE_URL ?>/tickets/status" class="d-flex gap-2">
+        <input type="hidden" name="id" value="<?= (int)$ticket['id'] ?>">
 
-        <div class="col-md-4">
-          <select class="form-select" name="status">
-            <?php foreach (['abierto','en_proceso','cerrado'] as $s): ?>
-              <option value="<?= $s ?>" <?= $ticket['status']===$s?'selected':'' ?>>
-                <?= ucfirst(str_replace('_',' ', $s)) ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
+        <button class="btn btn-outline-success btn-sm" name="status" value="abierto">
+          Abrir
+        </button>
 
-        <div class="col-md-4">
-          <select class="form-select" name="priority">
-            <?php foreach (['baja','media','alta'] as $p): ?>
-              <option value="<?= $p ?>" <?= $ticket['priority']===$p?'selected':'' ?>>
-                <?= ucfirst($p) ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
+        <button class="btn btn-outline-warning btn-sm" name="status" value="en_proceso">
+          En proceso
+        </button>
 
-        <div class="col-md-4">
-          <button class="btn btn-primary w-100">Actualizar</button>
-        </div>
+        <button class="btn btn-outline-secondary btn-sm" name="status" value="cerrado"
+                onclick="return confirm('¿Cerrar este ticket?')">
+          Cerrar
+        </button>
       </form>
     <?php endif; ?>
-
-    <a class="btn btn-link mt-3" href="<?= BASE_URL ?>/tickets">← Volver</a>
   </div>
 </div>
 

@@ -5,8 +5,6 @@ use App\Core\Router;
 use App\Controllers\AuthController;
 use App\Controllers\TicketController;
 use App\Middleware\AuthMiddleware;
-use App\Controllers\UserController;
-use App\Middleware\AdminMiddleware;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -22,7 +20,7 @@ define('BASE_URL', ($baseUrl === '' || $baseUrl === '/') ? '' : $baseUrl);
 $router = new Router();
 
 /**
- * HOME → login
+ * HOME
  */
 $router->get('/', function () {
     header('Location: ' . BASE_URL . '/login');
@@ -33,13 +31,12 @@ $router->get('/', function () {
  * AUTH
  */
 $auth = new AuthController();
-
 $router->get('/login', [$auth, 'showLogin']);
 $router->post('/login', [$auth, 'doLogin']);
 $router->get('/logout', [$auth, 'logout']);
 
 /**
- * DASHBOARD (protegido)
+ * DASHBOARD
  */
 $router->get('/dashboard', function () {
     AuthMiddleware::handle();
@@ -49,65 +46,40 @@ $router->get('/dashboard', function () {
 /**
  * TICKETS
  */
-$ticket = new TicketController();
+$tickets = new TicketController();
 
-/* Listar tickets */
-$router->get('/tickets', function () use ($ticket) {
+$router->get('/tickets', function () use ($tickets) {
     AuthMiddleware::handle();
-    $ticket->index();
+    $tickets->index();
 });
 
-/* Form crear ticket */
-$router->get('/tickets/create', function () use ($ticket) {
+$router->get('/tickets/create', function () use ($tickets) {
     AuthMiddleware::handle();
-    $ticket->createForm();
+    $tickets->createForm();
 });
 
-/* Guardar ticket */
-$router->post('/tickets/create', function () use ($ticket) {
+$router->post('/tickets/create', function () use ($tickets) {
     AuthMiddleware::handle();
-    $ticket->store();
+    $tickets->store();
 });
 
-/* Ver ticket */
-$router->get('/tickets/{id}', function ($id) use ($ticket) {
+/**
+ * DETALLE ticket: /tickets/{id}
+ * (esto funciona si tu Router soporta {id}. Si tu Router usa otro formato,
+ * me dices y lo adapto al tuyo.)
+ */
+$router->get('/tickets/{id}', function ($id) use ($tickets) {
     AuthMiddleware::handle();
-    $ticket->show((int)$id);
+    $tickets->show((int)$id);
 });
 
-/* Actualizar ticket (admin) */
-$router->post('/tickets/update', function () use ($ticket) {
+/**
+ * CAMBIAR ESTADO / CERRAR (admin)
+ */
+$router->post('/tickets/status', function () use ($tickets) {
     AuthMiddleware::handle();
-    $ticket->update();
+    $tickets->updateStatus();
 });
-
-$userAdmin = new UserController();
-
-$router->get('/admin/users', function () use ($userAdmin) {
-    AdminMiddleware::handle();
-    $userAdmin->index();
-});
-
-$router->get('/admin/users/create', function () use ($userAdmin) {
-    AdminMiddleware::handle();
-    $userAdmin->createForm();
-});
-
-$router->post('/admin/users/create', function () use ($userAdmin) {
-    AdminMiddleware::handle();
-    $userAdmin->store();
-});
-
-$router->post('/admin/users/toggle', function () use ($userAdmin) {
-    AdminMiddleware::handle();
-    $userAdmin->toggleActive();
-});
-
-$router->post('/admin/users/delete', function () use ($userAdmin) {
-    AdminMiddleware::handle();
-    $userAdmin->delete();
-});
-
 
 /**
  * DISPATCH
