@@ -1,37 +1,33 @@
-<div class="card">
+<?php
+$title = 'Nuevo Ticket';
+require __DIR__ . '/../layouts/header.php';
+?>
+
+<div class="card shadow-sm">
   <div class="card-body">
-    <h5 class="mb-3">Nuevo ticket</h5>
+    <h1 class="h4 mb-3">Crear Ticket</h1>
 
-    <form method="post" action="/tickets/store">
-      <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrf) ?>">
+    <?php if (!empty($_SESSION['flash_error'])): ?>
+      <div class="alert alert-danger">
+        <?= $_SESSION['flash_error']; unset($_SESSION['flash_error']); ?>
+      </div>
+    <?php endif; ?>
 
+    <form method="post" action="<?= BASE_URL ?>/tickets/create">
       <div class="mb-3">
         <label class="form-label">Título</label>
-        <input class="form-control" name="title" required maxlength="180">
+        <input class="form-control" name="title" required>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Descripción</label>
-        <textarea class="form-control" name="description" rows="5" required></textarea>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Categoría</label>
-          <select class="form-select" name="category">
-            <option>Hardware</option><option>Software</option><option>Red</option><option>Accesos</option><option selected>Otros</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Prioridad</label>
-          <select class="form-select" name="priority">
-            <option>Baja</option><option selected>Media</option><option>Alta</option><option>Crítica</option>
-          </select>
-        </div>
+        <textarea class="form-control" name="description" rows="4" required></textarea>
       </div>
 
       <button class="btn btn-primary">Crear</button>
-      <a class="btn btn-link" href="/tickets">Cancelar</a>
+      <a class="btn btn-secondary" href="<?= BASE_URL ?>/tickets">Cancelar</a>
     </form>
   </div>
 </div>
+
+<?php require __DIR__ . '/../layouts/footer.php'; ?>

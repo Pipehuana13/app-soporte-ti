@@ -1,5 +1,15 @@
-<h1>Dashboard</h1>
+<?php
+$title = 'Dashboard';
+require __DIR__ . '/layouts/header.php';
+?>
 
-<p>Bienvenido <?= htmlspecialchars($_SESSION['user']['name'] ?? $_SESSION['user']['email']) ?></p>
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h1 class="h4 mb-2">Dashboard</h1>
+    <p class="mb-0">
+      Bienvenido <?= htmlspecialchars($_SESSION['user']['name'] ?? $_SESSION['user']['email']) ?>
+    </p>
+  </div>
+</div>
 
-<a href="logout">Cerrar sesión</a>
+<?php require __DIR__ . '/layouts/footer.php'; ?>

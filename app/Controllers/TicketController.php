@@ -1,58 +1,79 @@
 <?php
+declare(strict_types=1);
+
 namespace App\Controllers;
 
-use App\Core\Controller;
-use App\Core\Auth;
-use App\Core\Csrf;
 use App\Repositories\TicketRepository;
 
-final class TicketController extends Controller {
-  public function index(): void {
-    Auth::start();
-    if (!Auth::check()) $this->redirect('/login');
+final class TicketController
+{
+    private TicketRepository $tickets;
 
-    $u = Auth::user();
-    $repo = new TicketRepository();
-    $tickets = $repo->allForUser($u['id'], $u['role']);
+    public function __construct()
+    {
+        $this->tickets = new TicketRepository();
+    }
 
-    $this->view('tickets/index', ['tickets' => $tickets, 'user' => $u]);
-  }
+    public function index(): void
+    {
+        $tickets = $this->tickets->getAll();
+        require __DIR__ . '/../../views/tickets/index.php';
+    }
 
-  public function createForm(): void {
-    Auth::start();
-    if (!Auth::check()) $this->redirect('/login');
+    public function createForm(): void
+    {
+        require __DIR__ . '/../../views/tickets/create.php';
+    }
 
-    $this->view('tickets/create', ['csrf' => Csrf::token()]);
-  }
+    public function store(): void
+    {
+        $title = trim($_POST['title'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $userId = (int) $_SESSION['user']['id'];
 
-  public function store(): void {
-    Auth::start();
-    if (!Auth::check()) $this->redirect('/login');
-    Csrf::verify($_POST['csrf'] ?? null);
+        if ($title === '' || $description === '') {
+            $_SESSION['flash_error'] = 'Todos los campos son obligatorios';
+            header('Location: ' . BASE_URL . '/tickets/create');
+            exit;
+        }
 
-    $u = Auth::user();
-    $repo = new TicketRepository();
-    $id = $repo->create([
-      'title' => trim($_POST['title'] ?? ''),
-      'description' => trim($_POST['description'] ?? ''),
-      'category' => $_POST['category'] ?? 'Otros',
-      'priority' => $_POST['priority'] ?? 'Media',
-      'requester_id' => $u['id'],
-    ]);
+        $this->tickets->create($title, $description, $userId);
 
-    $this->redirect("/tickets/show?id={$id}");
-  }
+        header('Location: ' . BASE_URL . '/tickets');
+        exit;
+    }
 
-  public function show(): void {
-    Auth::start();
-    if (!Auth::check()) $this->redirect('/login');
+    public function show(int $id): void
+{
+    $ticket = $this->tickets->find($id);
 
-    $id = (int)($_GET['id'] ?? 0);
-    $repo = new TicketRepository();
-    $ticket = $repo->find($id);
+    if (!$ticket) {
+        http_response_code(404);
+        echo "Ticket no encontrado";
+        return;
+    }
 
-    if (!$ticket) { http_response_code(404); echo "Ticket no existe"; return; }
+    require __DIR__ . '/../../views/tickets/show.php';
+}
 
-    $this->view('tickets/show', ['ticket' => $ticket]);
-  }
+public function update(): void
+{
+    $id = (int) ($_POST['id'] ?? 0);
+    $status = $_POST['status'] ?? '';
+    $priority = $_POST['priority'] ?? '';
+
+    if (!in_array($status, ['abierto','en_proceso','cerrado'], true)) {
+        return;
+    }
+
+    if (!in_array($priority, ['baja','media','alta'], true)) {
+        return;
+    }
+
+    $this->tickets->updateStatus($id, $status, $priority);
+
+    header('Location: ' . BASE_URL . '/tickets/' . $id);
+    exit;
+}
+
 }
