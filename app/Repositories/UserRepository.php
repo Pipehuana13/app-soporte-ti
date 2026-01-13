@@ -45,4 +45,54 @@ class UserRepository
 
         return $user;
     }
+
+    public function getAll(): array
+{
+    return $this->pdo->query("
+        SELECT id, name, email, role, active
+        FROM users
+        ORDER BY id DESC
+    ")->fetchAll();
+}
+
+public function create(string $name, string $email, string $password, string $role, int $active = 1): void
+{
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+
+    $stmt = $this->pdo->prepare("
+        INSERT INTO users (name, email, password_hash, role, active)
+        VALUES (:name, :email, :hash, :role, :active)
+    ");
+
+    $stmt->execute([
+        'name' => $name,
+        'email' => $email,
+        'hash' => $hash,
+        'role' => $role,
+        'active' => $active,
+    ]);
+}
+
+public function setActive(int $id, int $active): void
+{
+    $stmt = $this->pdo->prepare("UPDATE users SET active = :a WHERE id = :id");
+    $stmt->execute(['a' => $active, 'id' => $id]);
+}
+
+public function hasTickets(int $id): bool
+{
+    $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM tickets WHERE user_id = :id");
+    $stmt->execute(['id' => $id]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
+public function deleteById(int $id): void
+{
+    $stmt = $this->pdo->prepare("DELETE FROM users WHERE id = :id");
+    $stmt->execute(['id' => $id]);
+}
+
+
+
+
 }

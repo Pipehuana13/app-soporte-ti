@@ -16,8 +16,16 @@ final class TicketController
 
     public function index(): void
     {
+        $role = $_SESSION['user']['role'] ?? 'user';
+    $userId = (int)($_SESSION['user']['id'] ?? 0);
+
+    if ($role === 'admin') {
         $tickets = $this->tickets->getAll();
-        require __DIR__ . '/../../views/tickets/index.php';
+    } else {
+        $tickets = $this->tickets->getByUser($userId);
+    }
+
+    require __DIR__ . '/../../views/tickets/index.php';
     }
 
     public function createForm(): void
@@ -58,6 +66,12 @@ final class TicketController
 
 public function update(): void
 {
+    if (($_SESSION['user']['role'] ?? '') !== 'admin') {
+        http_response_code(403);
+        echo "403 Forbidden";
+        exit;
+    }
+
     $id = (int) ($_POST['id'] ?? 0);
     $status = $_POST['status'] ?? '';
     $priority = $_POST['priority'] ?? '';

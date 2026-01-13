@@ -8,7 +8,7 @@ final class AdminMiddleware
     public static function handle(): void
     {
         if (!isset($_SESSION['user'])) {
-            header('Location: login');
+            header('Location: ' . BASE_URL . '/login');
             exit;
         }
 

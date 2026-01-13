@@ -5,6 +5,8 @@ use App\Core\Router;
 use App\Controllers\AuthController;
 use App\Controllers\TicketController;
 use App\Middleware\AuthMiddleware;
+use App\Controllers\UserController;
+use App\Middleware\AdminMiddleware;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -78,6 +80,34 @@ $router->post('/tickets/update', function () use ($ticket) {
     AuthMiddleware::handle();
     $ticket->update();
 });
+
+$userAdmin = new UserController();
+
+$router->get('/admin/users', function () use ($userAdmin) {
+    AdminMiddleware::handle();
+    $userAdmin->index();
+});
+
+$router->get('/admin/users/create', function () use ($userAdmin) {
+    AdminMiddleware::handle();
+    $userAdmin->createForm();
+});
+
+$router->post('/admin/users/create', function () use ($userAdmin) {
+    AdminMiddleware::handle();
+    $userAdmin->store();
+});
+
+$router->post('/admin/users/toggle', function () use ($userAdmin) {
+    AdminMiddleware::handle();
+    $userAdmin->toggleActive();
+});
+
+$router->post('/admin/users/delete', function () use ($userAdmin) {
+    AdminMiddleware::handle();
+    $userAdmin->delete();
+});
+
 
 /**
  * DISPATCH

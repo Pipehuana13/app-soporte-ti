@@ -73,4 +73,18 @@ public function updateStatus(int $id, string $status, string $priority): void
             ")
             ->fetchAll();
     }
+
+public function getByUser(int $userId): array
+{
+    $stmt = $this->pdo->prepare("
+        SELECT t.*, u.name AS user_name
+        FROM tickets t
+        JOIN users u ON u.id = t.user_id
+        WHERE t.user_id = :uid
+        ORDER BY t.created_at DESC
+    ");
+    $stmt->execute(['uid' => $userId]);
+    return $stmt->fetchAll();
+}
+
 }
