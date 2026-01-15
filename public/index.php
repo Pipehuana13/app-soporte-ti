@@ -65,8 +65,8 @@ $router->post('/tickets/create', function () use ($tickets) {
 
 /**
  * DETALLE ticket: /tickets/{id}
- * (esto funciona si tu Router soporta {id}. Si tu Router usa otro formato,
- * me dices y lo adapto al tuyo.)
+ * (esto funciona si Router soporta {id}. Si Router usa otro formato,
+ *.)
  */
 $router->get('/tickets/{id}', function ($id) use ($tickets) {
     AuthMiddleware::handle();
@@ -84,4 +84,10 @@ $router->post('/tickets/status', function () use ($tickets) {
 /**
  * DISPATCH
  */
-$router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+
+// si estás en /app_Soporte/public, se lo quitamos para que el router reciba /tickets
+$path = substr($uri, strlen(BASE_URL)) ?: '/';
+
+$router->dispatch($_SERVER['REQUEST_METHOD'], $path);
+

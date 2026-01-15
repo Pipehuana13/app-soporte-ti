@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'felipearaya/soporte-ti',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '12d30f751ad3f6d908d438548b62a6243aeb4065',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,9 +11,9 @@
     ),
     'versions' => array(
         'felipearaya/soporte-ti' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '12d30f751ad3f6d908d438548b62a6243aeb4065',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

@@ -1,100 +1,89 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controllers;
+namespace App\Repositories;
 
-use App\Repositories\TicketRepository;
+use PDO;
 
-final class TicketController
+final class TicketRepository
 {
-    private TicketRepository $tickets;
+    private PDO $pdo;
 
     public function __construct()
     {
-        $this->tickets = new TicketRepository();
+        $this->pdo = new PDO(
+            "mysql:host=localhost;dbname=soporte_ti;charset=utf8mb4",
+            "root",
+            "",
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]
+        );
     }
 
-    public function index(): void
+    public function create(string $title, string $description, int $userId): void
     {
-        $role = $_SESSION['user']['role'] ?? 'user';
-        $userId = (int)($_SESSION['user']['id'] ?? 0);
+        $stmt = $this->pdo->prepare("
+            INSERT INTO tickets (title, description, user_id)
+            VALUES (:title, :description, :user_id)
+        ");
 
-        if ($role === 'admin') {
-            $tickets = $this->tickets->getAll();
-        } else {
-            $tickets = $this->tickets->getByUser($userId);
-        }
-
-        require __DIR__ . '/../../views/tickets/index.php';
+        $stmt->execute([
+            'title' => $title,
+            'description' => $description,
+            'user_id' => $userId,
+        ]);
     }
 
-    public function createForm(): void
+    public function getAll(): array
     {
-        require __DIR__ . '/../../views/tickets/create.php';
+        return $this->pdo
+            ->query("
+                SELECT t.*, u.name AS user_name
+                FROM tickets t
+                JOIN users u ON u.id = t.user_id
+                ORDER BY t.created_at DESC
+            ")
+            ->fetchAll();
     }
 
-    public function store(): void
+    public function getByUser(int $userId): array
     {
-        $title = trim($_POST['title'] ?? '');
-        $description = trim($_POST['description'] ?? '');
-        $userId = (int)($_SESSION['user']['id'] ?? 0);
-
-        if ($title === '' || $description === '') {
-            $_SESSION['flash_error'] = 'Todos los campos son obligatorios';
-            header('Location: ' . BASE_URL . '/tickets/create');
-            exit;
-        }
-
-        $this->tickets->create($title, $description, $userId);
-
-        header('Location: ' . BASE_URL . '/tickets');
-        exit;
+        $stmt = $this->pdo->prepare("
+            SELECT t.*, u.name AS user_name
+            FROM tickets t
+            JOIN users u ON u.id = t.user_id
+            WHERE t.user_id = :uid
+            ORDER BY t.created_at DESC
+        ");
+        $stmt->execute(['uid' => $userId]);
+        return $stmt->fetchAll();
     }
 
-    public function show(int $id): void
+    public function find(int $id): ?array
     {
-        $ticket = $this->tickets->find($id);
-
-        if (!$ticket) {
-            http_response_code(404);
-            echo "Ticket no encontrado";
-            return;
-        }
-
-        // seguridad extra: si NO es admin, solo puede ver sus tickets
-        $role = $_SESSION['user']['role'] ?? 'user';
-        $userId = (int)($_SESSION['user']['id'] ?? 0);
-        if ($role !== 'admin' && (int)$ticket['user_id'] !== $userId) {
-            http_response_code(403);
-            echo "403 Forbidden";
-            return;
-        }
-
-        require __DIR__ . '/../../views/tickets/show.php';
+        $stmt = $this->pdo->prepare("
+            SELECT t.*, u.name AS user_name
+            FROM tickets t
+            JOIN users u ON u.id = t.user_id
+            WHERE t.id = :id
+            LIMIT 1
+        ");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch() ?: null;
     }
 
-    public function updateStatus(): void
+    public function updateStatus(int $id, string $status): void
     {
-        // solo admin puede cambiar estado / cerrar
-        if (($_SESSION['user']['role'] ?? '') !== 'admin') {
-            http_response_code(403);
-            echo "403 Forbidden";
-            exit;
-        }
-
-        $id = (int)($_POST['id'] ?? 0);
-        $status = (string)($_POST['status'] ?? '');
-
-        $valid = ['abierto', 'en_proceso', 'cerrado'];
-        if ($id <= 0 || !in_array($status, $valid, true)) {
-            http_response_code(400);
-            echo "Bad Request";
-            exit;
-        }
-
-        $this->tickets->updateStatus($id, $status);
-
-        header('Location: ' . BASE_URL . '/tickets/' . $id);
-        exit;
+        $stmt = $this->pdo->prepare("
+            UPDATE tickets
+            SET status = :status
+            WHERE id = :id
+        ");
+        $stmt->execute([
+            'status' => $status,
+            'id' => $id,
+        ]);
     }
 }
