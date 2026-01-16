@@ -38,8 +38,11 @@ $user = $_SESSION['user'] ?? null;
           </li>
 
       <?php if (($user['role'] ?? '') === 'admin'): ?>
-          <li class="nav-item"><a class="nav-link" href="<?= BASE_URL ?>/admin/users">Usuarios</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?= BASE_URL ?>/users">Usuarios</a>
+          </li>
         <?php endif; ?>
+        
         </ul>
       <?php endif; ?>
 
@@ -57,6 +60,4 @@ $user = $_SESSION['user'] ?? null;
     </div>
   </div>
 </nav>
-
-
 <main class="container py-4">

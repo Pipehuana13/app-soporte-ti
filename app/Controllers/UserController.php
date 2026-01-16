@@ -5,7 +5,7 @@ namespace App\Controllers;
 
 use App\Repositories\UserRepository;
 
-final class UserController
+class UserController
 {
     private UserRepository $users;
 
@@ -14,83 +14,85 @@ final class UserController
         $this->users = new UserRepository();
     }
 
+    private function requireAdmin(): void
+    {
+        if (($_SESSION['user']['role'] ?? '') !== 'admin') {
+            http_response_code(403);
+            exit('403 Forbidden');
+        }
+    }
+
     public function index(): void
     {
-        $users = $this->users->getAll();
+        $this->requireAdmin();
+
+        // OJO: debe existir all() en tu UserRepository
+        $users = $this->users->all();
+
         require __DIR__ . '/../../views/users/index.php';
     }
 
     public function createForm(): void
     {
+        $this->requireAdmin();
         require __DIR__ . '/../../views/users/create.php';
     }
 
     public function store(): void
     {
-        $name = trim($_POST['name'] ?? '');
+        $this->requireAdmin();
+
+        $name  = trim($_POST['name'] ?? '');
         $email = trim($_POST['email'] ?? '');
-        $password = (string)($_POST['password'] ?? '');
-        $role = $_POST['role'] ?? 'user';
-        $active = (int)($_POST['active'] ?? 1);
+        $role  = trim($_POST['role'] ?? 'user');
+        $pass  = (string)($_POST['password'] ?? '');
 
-        if ($name === '' || $email === '' || $password === '') {
+        if ($name === '' || $email === '' || $pass === '') {
             $_SESSION['flash_error'] = 'Todos los campos son obligatorios.';
-            header('Location: ' . BASE_URL . '/admin/users/create');
+            header('Location: ' . BASE_URL . '/users/create');
             exit;
         }
 
-        if (!in_array($role, ['admin','user'], true)) $role = 'user';
-        $active = ($active === 1) ? 1 : 0;
-
-        try {
-            $this->users->create($name, $email, $password, $role, $active);
-            $_SESSION['flash_success'] = 'Usuario creado correctamente.';
-        } catch (\Throwable $e) {
-            $_SESSION['flash_error'] = 'No se pudo crear (¿email duplicado?).';
-        }
-
-        header('Location: ' . BASE_URL . '/admin/users');
-        exit;
-    }
-
-    public function toggleActive(): void
-    {
-        $id = (int)($_POST['id'] ?? 0);
-        $active = (int)($_POST['active'] ?? 1);
-
-        if ($id === (int)($_SESSION['user']['id'] ?? 0)) {
-            $_SESSION['flash_error'] = 'No puedes desactivar tu propio usuario.';
-            header('Location: ' . BASE_URL . '/admin/users');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['flash_error'] = 'Email inválido.';
+            header('Location: ' . BASE_URL . '/users/create');
             exit;
         }
 
-        $this->users->setActive($id, $active === 1 ? 1 : 0);
-        $_SESSION['flash_success'] = 'Estado actualizado.';
-        header('Location: ' . BASE_URL . '/admin/users');
+        if (!in_array($role, ['admin', 'user'], true)) {
+            $role = 'user';
+        }
+
+        // OJO: debe existir create() en tu UserRepository
+        $this->users->create($name, $email, $pass, $role);
+
+        $_SESSION['flash_success'] = 'Usuario creado correctamente.';
+        header('Location: ' . BASE_URL . '/users');
         exit;
     }
 
     public function delete(): void
     {
+        $this->requireAdmin();
+
         $id = (int)($_POST['id'] ?? 0);
+        if ($id <= 0) {
+            header('Location: ' . BASE_URL . '/users');
+            exit;
+        }
 
-        if ($id === (int)($_SESSION['user']['id'] ?? 0)) {
+        $me = (int)($_SESSION['user']['id'] ?? 0);
+        if ($id === $me) {
             $_SESSION['flash_error'] = 'No puedes eliminar tu propio usuario.';
-            header('Location: ' . BASE_URL . '/admin/users');
+            header('Location: ' . BASE_URL . '/users');
             exit;
         }
 
-        // Si tiene tickets, mejor desactivar
-        if ($this->users->hasTickets($id)) {
-            $this->users->setActive($id, 0);
-            $_SESSION['flash_success'] = 'Usuario desactivado (tenía tickets asociados).';
-            header('Location: ' . BASE_URL . '/admin/users');
-            exit;
-        }
-
+        // OJO: debe existir deleteById() en tu UserRepository
         $this->users->deleteById($id);
+
         $_SESSION['flash_success'] = 'Usuario eliminado.';
-        header('Location: ' . BASE_URL . '/admin/users');
+        header('Location: ' . BASE_URL . '/users');
         exit;
     }
 }

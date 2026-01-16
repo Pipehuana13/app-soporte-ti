@@ -16,7 +16,7 @@ function priorityBadge(string $priority): string {
 
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="h4 mb-0">Tickets</h1>
-  <a class="btn btn-primary" href="<?= BASE_URL ?>/tickets/create">
+  <a class="btn btn-primary" href="<?= BASE_URL ?>/tickets/create">Nuevo ticket</a>
     Nuevo ticket
   </a>
 </div>

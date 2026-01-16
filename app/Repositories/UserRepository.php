@@ -47,29 +47,25 @@ class UserRepository
     }
 
     public function getAll(): array
-{
-    return $this->pdo->query("
-        SELECT id, name, email, role, active
-        FROM users
-        ORDER BY id DESC
-    ")->fetchAll();
-}
+    {
+        $stmt = $this->pdo->query("SELECT id, name, email, role, active FROM users ORDER BY id DESC");
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+    }
 
-public function create(string $name, string $email, string $password, string $role, int $active = 1): void
+public function create(string $name, string $email, string $password, string $role = 'user'): void
 {
     $hash = password_hash($password, PASSWORD_DEFAULT);
 
     $stmt = $this->pdo->prepare("
         INSERT INTO users (name, email, password_hash, role, active)
-        VALUES (:name, :email, :hash, :role, :active)
+        VALUES (:name, :email, :password_hash, :role, 1)
     ");
 
     $stmt->execute([
         'name' => $name,
         'email' => $email,
-        'hash' => $hash,
+        'password_hash' => $hash,
         'role' => $role,
-        'active' => $active,
     ]);
 }
 
@@ -92,7 +88,11 @@ public function deleteById(int $id): void
     $stmt->execute(['id' => $id]);
 }
 
-
+public function all(): array
+{
+    $stmt = $this->pdo->query("SELECT id, name, email, role, active FROM users ORDER BY id DESC");
+    return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+}
 
 
 }

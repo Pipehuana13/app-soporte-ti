@@ -5,6 +5,7 @@ use App\Core\Router;
 use App\Controllers\AuthController;
 use App\Controllers\TicketController;
 use App\Middleware\AuthMiddleware;
+use App\Controllers\UserController;
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -18,6 +19,7 @@ $baseUrl = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
 define('BASE_URL', ($baseUrl === '' || $baseUrl === '/') ? '' : $baseUrl);
 
 $router = new Router();
+$users = new UserController();
 
 /**
  * HOME
@@ -63,6 +65,12 @@ $router->post('/tickets/create', function () use ($tickets) {
     $tickets->store();
 });
 
+$router->get('/tickets/show', function () use ($tickets) {
+    AuthMiddleware::handle();
+    $id = (int)($_GET['id'] ?? 0);
+    $tickets->show($id);
+});
+
 /**
  * DETALLE ticket: /tickets/{id}
  * (esto funciona si Router soporta {id}. Si Router usa otro formato,
@@ -86,6 +94,55 @@ $router->post('/tickets/comment', function () use ($tickets) {
     AuthMiddleware::handle();
     $tickets->addComment();
 });
+
+// ...
+
+$users = new UserController();
+
+$router->get('/users', function () use ($users) {
+    AuthMiddleware::handle();
+    $users->index();
+});
+
+$router->get('/users/create', function () use ($users) {
+    AuthMiddleware::handle();
+    $users->createForm();
+});
+
+$router->post('/users/create', function () use ($users) {
+    AuthMiddleware::handle();
+    $users->store();
+});
+
+$router->post('/users/delete', function () use ($users) {
+    AuthMiddleware::handle();
+    $users->delete();
+});
+
+
+
+// USUARIOS
+$router->get('/users', function () use ($users) {
+    AuthMiddleware::handle();
+    $users->index();
+});
+
+$router->get('/users/create', function () use ($users) {
+    AuthMiddleware::handle();
+    $users->createForm();
+});
+
+$router->post('/users/create', function () use ($users) {
+    AuthMiddleware::handle();
+    $users->store();
+});
+
+$router->post('/users/delete', function () use ($users) {
+    AuthMiddleware::handle();
+    $users->delete();
+});
+
+
 
 
 /**
