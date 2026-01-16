@@ -70,6 +70,7 @@ $router->post('/tickets/create', function () use ($tickets) {
  */
 $router->get('/tickets/{id}', function ($id) use ($tickets) {
     AuthMiddleware::handle();
+    $id = (int)($_GET['id'] ?? 0);
     $tickets->show((int)$id);
 });
 
@@ -80,6 +81,12 @@ $router->post('/tickets/status', function () use ($tickets) {
     AuthMiddleware::handle();
     $tickets->updateStatus();
 });
+
+$router->post('/tickets/comment', function () use ($tickets) {
+    AuthMiddleware::handle();
+    $tickets->addComment();
+});
+
 
 /**
  * DISPATCH

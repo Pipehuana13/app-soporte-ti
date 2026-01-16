@@ -53,4 +53,49 @@ function statusBadge(string $status): string {
   </div>
 </div>
 
+<?php if (!empty($_SESSION['flash_error'])): ?>
+  <div class="alert alert-danger">
+    <?= $_SESSION['flash_error']; unset($_SESSION['flash_error']); ?>
+  </div>
+<?php endif; ?>
+
+<div class="card mt-3">
+  <div class="card-header">Comentarios</div>
+  <div class="card-body">
+
+    <?php if (($ticket['status'] ?? '') !== 'cerrado'): ?>
+      <form method="post" action="<?= BASE_URL ?>/tickets/comment" class="mb-3">
+        <input type="hidden" name="ticket_id" value="<?= (int)$ticket['id'] ?>">
+        <textarea name="comment"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Escribe un comentario..."
+                  required></textarea>
+        <div class="mt-2 d-flex justify-content-end">
+          <button class="btn btn-primary btn-sm" type="submit">Agregar comentario</button>
+        </div>
+      </form>
+    <?php else: ?>
+      <div class="alert alert-secondary mb-3">
+        Este ticket está cerrado. No se pueden agregar comentarios.
+      </div>
+    <?php endif; ?>
+
+    <?php if (empty($comments)): ?>
+      <div class="text-muted">Sin comentarios aún.</div>
+    <?php else: ?>
+      <?php foreach ($comments as $c): ?>
+        <div class="border rounded p-2 mb-2">
+          <div class="small text-muted">
+            <?= htmlspecialchars($c['created_at']) ?> — <?= htmlspecialchars($c['user_name'] ?? 'N/D') ?>
+          </div>
+          <div><?= nl2br(htmlspecialchars($c['comment'])) ?></div>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+
+  </div>
+</div>
+
+
 <?php require __DIR__ . '/../layouts/footer.php'; ?>
