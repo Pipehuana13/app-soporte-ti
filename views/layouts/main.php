@@ -20,6 +20,15 @@
   </div>
 </nav>
 
+<script>
+if ("Notification" in window) {
+    if (Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+}
+</script>
+
+
 <main class="container py-4">
   <?php require $viewFile; ?>
 </main>

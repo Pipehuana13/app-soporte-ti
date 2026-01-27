@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use PDO;
+use App\Core\DB;
 
 class UserRepository
 {
@@ -11,15 +12,7 @@ class UserRepository
 
     public function __construct()
     {
-        $this->pdo = new PDO(
-            "mysql:host=localhost;dbname=soporte_ti;charset=utf8mb4",
-            "root",
-            "",
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            ]
-        );
+        $this->pdo = DB::pdo();
     }
 
     public function findActiveByEmail(string $email): ?array

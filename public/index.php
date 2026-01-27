@@ -5,9 +5,15 @@ use App\Core\Router;
 use App\Controllers\AuthController;
 use App\Controllers\TicketController;
 use App\Middleware\AuthMiddleware;
+use App\Middleware\AdminMiddleware;
 use App\Controllers\UserController;
 
 require __DIR__ . '/../vendor/autoload.php';
+
+// Cargar variables desde .env
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
+$dotenv->safeLoad();
+
 
 session_start();
 
@@ -76,10 +82,10 @@ $router->get('/tickets/show', function () use ($tickets) {
  * (esto funciona si Router soporta {id}. Si Router usa otro formato,
  *.)
  */
-$router->get('/tickets/{id}', function ($id) use ($tickets) {
+$router->get('/tickets/{id}', function () use ($tickets) {
     AuthMiddleware::handle();
     $id = (int)($_GET['id'] ?? 0);
-    $tickets->show((int)$id);
+    $tickets->show($id);
 });
 
 /**
@@ -95,54 +101,28 @@ $router->post('/tickets/comment', function () use ($tickets) {
     $tickets->addComment();
 });
 
-// ...
-
+// USUARIOS
 $users = new UserController();
 
 $router->get('/users', function () use ($users) {
-    AuthMiddleware::handle();
+    AdminMiddleware::handle();
     $users->index();
 });
-
+// CREAR USUARIO
 $router->get('/users/create', function () use ($users) {
-    AuthMiddleware::handle();
-    $users->createForm();
+    AdminMiddleware::handle();
+    $users->createForm(); // CREAR
 });
-
+// CREAR ALMACENAR O PAPOI?
 $router->post('/users/create', function () use ($users) {
-    AuthMiddleware::handle();
-    $users->store();
+    AdminMiddleware::handle();
+    $users->store(); // ALMACENAR??
 });
-
+// ELIMINAR O DESACTIVAR 
 $router->post('/users/delete', function () use ($users) {
-    AuthMiddleware::handle();
-    $users->delete();
+    AdminMiddleware::handle();
+    $users->delete(); // ELIMINAR O DESACTIVAR PAPOI
 });
-
-
-
-// USUARIOS
-$router->get('/users', function () use ($users) {
-    AuthMiddleware::handle();
-    $users->index();
-});
-
-$router->get('/users/create', function () use ($users) {
-    AuthMiddleware::handle();
-    $users->createForm();
-});
-
-$router->post('/users/create', function () use ($users) {
-    AuthMiddleware::handle();
-    $users->store();
-});
-
-$router->post('/users/delete', function () use ($users) {
-    AuthMiddleware::handle();
-    $users->delete();
-});
-
-
 
 
 /**

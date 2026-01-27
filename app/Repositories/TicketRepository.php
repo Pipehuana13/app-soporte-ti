@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use PDO;
+use App\Core\DB;
 
 final class TicketRepository
 {
@@ -11,18 +12,10 @@ final class TicketRepository
 
     public function __construct()
     {
-        $this->db = new PDO(
-            "mysql:host=localhost;dbname=soporte_ti;charset=utf8mb4",
-            "root",
-            "",
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            ]
-        );
+        $this->db = DB::pdo();
     }
 
-    public function create(string $title, string $description, int $userId): void
+    public function create(string $title, string $description, int $userId): int
     {
         $stmt = $this->db->prepare("
             INSERT INTO tickets (title, description, user_id)
@@ -34,6 +27,9 @@ final class TicketRepository
             'description' => $description,
             'user_id' => $userId,
         ]);
+
+        return (int)$this->db->lastInsertId();
+
     }
 
     public function getAll(): array

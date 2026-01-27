@@ -47,8 +47,17 @@ final class TicketController
 
         $this->tickets->create($title, $description, $userId);
 
-        header('Location: ' . BASE_URL . '/tickets');
-        exit;
+// Notificación (flash)
+$ticketId = $this->tickets->create($title, $description, $userId);
+
+$_SESSION['notify'] = [
+  'title' => '📩 Ticket creado',
+  'body'  => 'Tu ticket fue creado correctamente.'
+];
+
+header('Location: ' . BASE_URL . '/tickets');
+exit;
+
     }
 
     public function show(int $id): void
@@ -123,8 +132,6 @@ final class TicketController
     header('Location: ' . BASE_URL . '/tickets/show?id=' . $ticketId);
     exit;
 }
-
-
     public function updateStatus(): void
 {
     if (($_SESSION['user']['role'] ?? '') !== 'admin') {
